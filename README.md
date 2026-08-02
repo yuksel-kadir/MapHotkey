@@ -1,5 +1,7 @@
 # Map Hotkey SA
 
+[![Build and release](https://github.com/yuksel-kadir/MapHotkeySA/actions/workflows/release.yml/badge.svg)](https://github.com/yuksel-kadir/MapHotkeySA/actions/workflows/release.yml)
+
 GTA San Andreas 1.0 US ASI plugin that opens the native pause-menu map directly.
 Press the configured binding again to close the menu and return to the game.
 
@@ -26,3 +28,16 @@ source/
 
 Generate the VS2022 solution with Premake, then build `ReleaseSA|Win32` against
 the workspace Plugin SDK. The output is `output/asi/MapHotkeySA.asi`.
+
+## Automated releases
+
+Pushing a tag whose name starts with `v` builds the plugin on GitHub's Windows
+runner and publishes `MapHotkeySA.zip` as a GitHub Release. For example:
+
+```powershell
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The workflow can also be run manually from the Actions tab. Manual runs upload
+the ZIP as a workflow artifact without creating a GitHub Release.

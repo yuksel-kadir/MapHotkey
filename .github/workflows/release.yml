@@ -1,0 +1,79 @@
+name: Build and release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  PLUGIN_SDK_DIR: ${{ github.workspace }}\plugin-sdk
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+      - name: Check out MapHotkeySA
+        uses: actions/checkout@v4
+
+      - name: Check out Plugin SDK
+        uses: actions/checkout@v4
+        with:
+          repository: DK22Pac/plugin-sdk
+          ref: 0cfee7cb32f5a8608fc7ca181cdb39fd7e1d91e4
+          path: plugin-sdk
+          submodules: recursive
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build Plugin SDK for GTA San Andreas
+        shell: pwsh
+        run: >-
+          msbuild .\plugin-sdk\plugin_sa\Plugin_SA.vcxproj
+          /m /t:Build
+          /p:Configuration=Release
+          /p:Platform=Win32
+          /v:minimal
+
+      - name: Generate MapHotkeySA project
+        shell: pwsh
+        run: >-
+          .\plugin-sdk\tools\premake\premake5.exe
+          vs2022
+          --file=.\premake5.lua
+
+      - name: Build MapHotkeySA
+        shell: pwsh
+        run: >-
+          msbuild .\project_files\map-hotkey.sln
+          /m /t:Build
+          /p:Configuration=ReleaseSA
+          /p:Platform=Win32
+          /v:minimal
+
+      - name: Package release
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force .\release\MapHotkeySA | Out-Null
+          Copy-Item .\output\asi\MapHotkeySA.asi .\release\MapHotkeySA\
+          Copy-Item .\resources\MapHotkeySA.ini .\release\MapHotkeySA\
+          Compress-Archive -Path .\release\MapHotkeySA -DestinationPath .\release\MapHotkeySA.zip
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MapHotkeySA
+          path: release/MapHotkeySA.zip
+          if-no-files-found: error
+
+      - name: Publish GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/MapHotkeySA.zip
+          generate_release_notes: true
