@@ -32,6 +32,14 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
 
+      - name: Generate Plugin SDK projects
+        working-directory: plugin-sdk
+        shell: pwsh
+        run: >-
+          .\tools\premake\premake5.exe
+          vs2022
+          --file=.\tools\premake\premake5.lua
+
       - name: Build Plugin SDK for GTA San Andreas
         shell: pwsh
         run: >-
