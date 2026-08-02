@@ -1,0 +1,24 @@
+# Premake / Visual Studio generated files
+project_files/
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# Build output
+output/
+*.obj
+*.pdb
+*.idb
+*.ilk
+*.exp
+*.lib
+
+# Runtime diagnostics
+*.log
+
+# OS and editor metadata
+.DS_Store
+Thumbs.db
+desktop.ini
