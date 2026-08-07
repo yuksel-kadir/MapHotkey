@@ -1,6 +1,6 @@
 # GTA Map Hotkey
 
-[![Build and release](https://github.com/yuksel-kadir/MapHotkeySA/actions/workflows/release.yml/badge.svg)](https://github.com/yuksel-kadir/MapHotkeySA/actions/workflows/release.yml)
+[![Build and release](https://github.com/yuksel-kadir/MapHotkey/actions/workflows/release.yml/badge.svg)](https://github.com/yuksel-kadir/MapHotkey/actions/workflows/release.yml)
 
 ASI plugins that open the pause-menu map directly in the original PC releases
 of GTA III, Vice City and San Andreas. Press the configured binding again to
