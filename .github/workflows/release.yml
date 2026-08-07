@@ -18,7 +18,7 @@ jobs:
     runs-on: windows-2022
 
     steps:
-      - name: Check out MapHotkeySA
+      - name: Check out GTA Map Hotkey
         uses: actions/checkout@v4
 
       - name: Check out Plugin SDK
@@ -40,49 +40,65 @@ jobs:
           vs2022
           --file=.\tools\premake\premake5.lua
 
-      - name: Build Plugin SDK for GTA San Andreas
+      - name: Correct Plugin SDK VC offset assertion
         shell: pwsh
-        run: >-
-          msbuild .\plugin-sdk\plugin_sa\Plugin_SA.vcxproj
-          /m /t:Build
-          /p:Configuration=Release
-          /p:Platform=Win32
-          /v:minimal
+        run: |
+          $path = '.\plugin-sdk\plugin_vc\game_vc\CRunningScript.h'
+          $text = Get-Content $path -Raw
+          $text = $text.Replace('m_bAwake, 0x7B', 'm_bSkipWakeTime, 0x7B')
+          Set-Content $path $text
 
-      - name: Generate MapHotkeySA project
+      - name: Build Plugin SDK libraries
+        shell: pwsh
+        run: |
+          msbuild .\plugin-sdk\plugin_III\Plugin_III.vcxproj /m /t:Build /p:Configuration=Release /p:Platform=Win32 /v:minimal
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          msbuild .\plugin-sdk\plugin_vc\Plugin_VC.vcxproj /m /t:Build /p:Configuration=Release /p:Platform=Win32 /v:minimal
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          msbuild .\plugin-sdk\plugin_sa\Plugin_SA.vcxproj /m /t:Build /p:Configuration=Release /p:Platform=Win32 /v:minimal
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+      - name: Generate GTA Map Hotkey project
         shell: pwsh
         run: >-
           .\plugin-sdk\tools\premake\premake5.exe
           vs2022
           --file=.\premake5.lua
 
-      - name: Build MapHotkeySA
+      - name: Build all game variants
         shell: pwsh
-        run: >-
-          msbuild .\project_files\map-hotkey.sln
-          /m /t:Build
-          /p:Configuration=ReleaseSA
-          /p:Platform=Win32
-          /v:minimal
+        run: |
+          msbuild .\project_files\map-hotkey.sln /m /t:Build /p:Configuration=ReleaseIII /p:Platform=Win32 /v:minimal
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          msbuild .\project_files\map-hotkey.sln /m /t:Build /p:Configuration=ReleaseVC /p:Platform=Win32 /v:minimal
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          msbuild .\project_files\map-hotkey.sln /m /t:Build /p:Configuration=ReleaseSA /p:Platform=Win32 /v:minimal
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
       - name: Package release
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force .\release\MapHotkeySA | Out-Null
-          Copy-Item .\output\asi\MapHotkeySA.asi .\release\MapHotkeySA\
-          Copy-Item .\resources\MapHotkeySA.ini .\release\MapHotkeySA\
-          Compress-Archive -Path .\release\MapHotkeySA -DestinationPath .\release\MapHotkeySA.zip
+          New-Item -ItemType Directory -Force '.\release\GTAMapHotkey\GTA III' | Out-Null
+          New-Item -ItemType Directory -Force '.\release\GTAMapHotkey\Vice City' | Out-Null
+          New-Item -ItemType Directory -Force '.\release\GTAMapHotkey\San Andreas' | Out-Null
+          Copy-Item .\output\asi\MapHotkeyIII.asi '.\release\GTAMapHotkey\GTA III\'
+          Copy-Item .\resources\MapHotkeyIII.ini '.\release\GTAMapHotkey\GTA III\'
+          Copy-Item .\output\asi\MapHotkeyVC.asi '.\release\GTAMapHotkey\Vice City\'
+          Copy-Item .\resources\MapHotkeyVC.ini '.\release\GTAMapHotkey\Vice City\'
+          Copy-Item .\output\asi\MapHotkeySA.asi '.\release\GTAMapHotkey\San Andreas\'
+          Copy-Item .\resources\MapHotkeySA.ini '.\release\GTAMapHotkey\San Andreas\'
+          Compress-Archive -Path .\release\GTAMapHotkey -DestinationPath .\release\GTAMapHotkey.zip
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MapHotkeySA
-          path: release/MapHotkeySA.zip
+          name: GTAMapHotkey
+          path: release/GTAMapHotkey.zip
           if-no-files-found: error
 
       - name: Publish GitHub release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: release/MapHotkeySA.zip
+          files: release/GTAMapHotkey.zip
           generate_release_notes: true
