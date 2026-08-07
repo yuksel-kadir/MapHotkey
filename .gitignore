@@ -8,6 +8,7 @@ project_files/
 
 # Build output
 output/
+release/
 *.obj
 *.pdb
 *.idb

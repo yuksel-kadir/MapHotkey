@@ -2,6 +2,7 @@
 
 #include "config/Config.h"
 #include "frontend/FrontendControl.h"
+#include "frontend/GameFrontend.h"
 #include "input/HotkeyInput.h"
 #include "logging/Logger.h"
 
@@ -23,14 +24,15 @@ void ProcessGame() {
 }
 }
 
-class MapHotkeySA {
+class MapHotkey {
 public:
-    MapHotkeySA() {
+    MapHotkey() {
         Config::Initialize();
         const Settings& settings = Config::Get();
 
         Log(
-            "MapHotkeySA loaded enabled=%d key=0x%X controller=%d button=%d",
+            "MapHotkey loaded game=%s enabled=%d key=0x%X controller=%d button=%d",
+            GameFrontend::Name(),
             settings.enabled,
             settings.keyboardKey,
             settings.controllerEnabled,
@@ -39,4 +41,4 @@ public:
 
         Events::gameProcessEvent += ProcessGame;
     }
-} g_mapHotkeySA;
+} g_mapHotkey;
