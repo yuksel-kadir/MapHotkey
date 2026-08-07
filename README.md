@@ -60,12 +60,21 @@ compatibility correction before compiling `Plugin_VC.lib`.
 ## Automated releases
 
 Pull requests build and package all three variants. Pushing a tag whose name
-starts with `v` publishes a combined `GTAMapHotkey.zip` GitHub Release:
+starts with `v` publishes three independent downloads so users only need the
+archive for their game:
+
+```text
+MapHotkeyIII.zip
+MapHotkeyVC.zip
+MapHotkeySA.zip
+```
+
+To create a release:
 
 ```powershell
 git tag v1.1.0
 git push origin v1.1.0
 ```
 
-Manual workflow runs upload the combined ZIP as an Actions artifact without
-creating a GitHub Release.
+Manual workflow runs upload the three ZIPs as separate Actions artifacts
+without creating a GitHub Release.

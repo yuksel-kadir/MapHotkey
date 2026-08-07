@@ -78,27 +78,46 @@ jobs:
       - name: Package release
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force '.\release\GTAMapHotkey\GTA III' | Out-Null
-          New-Item -ItemType Directory -Force '.\release\GTAMapHotkey\Vice City' | Out-Null
-          New-Item -ItemType Directory -Force '.\release\GTAMapHotkey\San Andreas' | Out-Null
-          Copy-Item .\output\asi\MapHotkeyIII.asi '.\release\GTAMapHotkey\GTA III\'
-          Copy-Item .\resources\MapHotkeyIII.ini '.\release\GTAMapHotkey\GTA III\'
-          Copy-Item .\output\asi\MapHotkeyVC.asi '.\release\GTAMapHotkey\Vice City\'
-          Copy-Item .\resources\MapHotkeyVC.ini '.\release\GTAMapHotkey\Vice City\'
-          Copy-Item .\output\asi\MapHotkeySA.asi '.\release\GTAMapHotkey\San Andreas\'
-          Copy-Item .\resources\MapHotkeySA.ini '.\release\GTAMapHotkey\San Andreas\'
-          Compress-Archive -Path .\release\GTAMapHotkey -DestinationPath .\release\GTAMapHotkey.zip
+          New-Item -ItemType Directory -Force .\release\III | Out-Null
+          New-Item -ItemType Directory -Force .\release\VC | Out-Null
+          New-Item -ItemType Directory -Force .\release\SA | Out-Null
+          Copy-Item .\output\asi\MapHotkeyIII.asi .\release\III\
+          Copy-Item .\resources\MapHotkeyIII.ini .\release\III\
+          Copy-Item .\output\asi\MapHotkeyVC.asi .\release\VC\
+          Copy-Item .\resources\MapHotkeyVC.ini .\release\VC\
+          Copy-Item .\output\asi\MapHotkeySA.asi .\release\SA\
+          Copy-Item .\resources\MapHotkeySA.ini .\release\SA\
+          Compress-Archive -Path .\release\III\* -DestinationPath .\release\MapHotkeyIII.zip
+          Compress-Archive -Path .\release\VC\* -DestinationPath .\release\MapHotkeyVC.zip
+          Compress-Archive -Path .\release\SA\* -DestinationPath .\release\MapHotkeySA.zip
 
-      - name: Upload build artifact
+      - name: Upload GTA III artifact
         uses: actions/upload-artifact@v4
         with:
-          name: GTAMapHotkey
-          path: release/GTAMapHotkey.zip
+          name: MapHotkeyIII
+          path: release/MapHotkeyIII.zip
+          if-no-files-found: error
+
+      - name: Upload Vice City artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MapHotkeyVC
+          path: release/MapHotkeyVC.zip
+          if-no-files-found: error
+
+      - name: Upload San Andreas artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MapHotkeySA
+          path: release/MapHotkeySA.zip
           if-no-files-found: error
 
       - name: Publish GitHub release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: release/GTAMapHotkey.zip
+          files: |
+            release/MapHotkeyIII.zip
+            release/MapHotkeyVC.zip
+            release/MapHotkeySA.zip
           generate_release_notes: true
